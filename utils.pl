@@ -119,8 +119,8 @@ myabs(X,Y):-
 %gFirstList(Y,[(X,Y)|_],X).
 %gFirstList(Y,[(_,_)|L],X):- gFirstList(Y,L,X).
 
-%gSecondList(X,[(X,Y)|_],Y).
-%gSecondList(X,[(_,_)|L],Y):- gSecondList(X,L,Y).
+gSecondList([],[]):-!.
+gSecondList([(_,Z)|L],[Z|Y]):- gSecondList(L,Y).
 
 allCero([0]):-!.
 allCero([0|P]):-

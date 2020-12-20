@@ -54,15 +54,9 @@ winners(X) :-
 %see all the posibilities
 posibleMove(L):-
     findall((X,Y,Z),
-    (
-        fac(X,Y,Z),
-        (Z =\= 0)),
-        L1),
+    (fac(X,Y,Z),(Z =\= 0)),L1),
     findall((0,M,N),
-    (
-        center(M,N),
-        N=\=0),
-        L2),
+    (center(M,N),N=\=0),L2),
     append(L1,L2,L).
 
 checkSpecialTile(_):- specialTile(X), X =\= 0.
@@ -74,7 +68,8 @@ updateFloor(Player,Color,Count):-
     findall(Z,(playerFloor(Player,_,Z),Z > 0),L),
     addList(L,S),
     addSpecialTile(Player,S,D),
-    plus(D,R,7),%how much I need to get to 7
+    PD is -1 * D,
+    plus(PD,R,7),%how much I need to get to 7
     min(R,Count,A),%How much I will add
     playerFloor(Player,Color,X),%now many tiles of this color are now
     write(" Al suelo:"),
@@ -104,6 +99,8 @@ takeTiles(_,Ind,Color,Count):-
     pT(Color,Color),
     pT(" from the Factory"-Ind,cyan),
     retractall(fac(Ind,Color,Count)),
+    T=..[fac,Ind,Color,0],
+    assert(T),
     cleanFactory(Ind).
 
 updateStair(Player,Color,A,0):-
@@ -149,33 +146,22 @@ onStairs(Player,Color,Count):-
     pT(" and put it in the stair ":Count,cyan).
 onStairs(Player,Color,Count):-
     color(Color,Number),
-    findall(
-        (Ca,Co,Diference),
-        (
-            stairPlayer(Player,Ca, Number,Co),
-            (Ca > Co),
-            Diference is Ca-Co-Count,
-            (Diference > -3)),
-            L),
+    findall((Ca,Co,Diference),
+        (stairPlayer(Player,Ca, Number,Co),
+            (Ca > Co),Diference is Ca-Co-Count,
+            (Diference > -3)),L),
     choise(Player,Color,L).
 onStairs(Player,Color,Count):-
-    findall(
-        (Ca,X),
-        (stairPlayer(Player,Ca,_,0),
-            plus(Count,X,Ca)),
-        L),
+    findall((Ca,X),(stairPlayer(Player,Ca,_,0),
+            plus(Count,X,Ca)), L),
     greaterSecond(L,(A,B)),
     updateStair(Player,Color,A,B),
-     pT(" and going to the stair ":A,cyan).
+    pT(" and going to the stair ":A,cyan).
 onStairs(Player,Color,Count):-
     color(Color,Number),
-    findall(
-        (Ca,Co,Diference),
-        (stairPlayer(Player,Ca, Number,Co),
-            (Ca > Co),
-            Diference is Ca-Co-Count,
-            (Diference < -2)),
-        L),
+    findall((Ca,Co,Diference),(stairPlayer(Player,Ca, Number,Co),
+            (Ca > Co),Diference is Ca-Co-Count,
+            (Diference < -2)),L),
     choise(Player,Color,L).
 onStairs(Player,Color,Count):-
     updateFloor(Player,Color,Count),
@@ -187,13 +173,20 @@ selectRandom(L,R):-
     random(1,Le,R).
 
 makeMove(Player):-
-    pT("\n Player"-Player,cyan),
     posibleMove(L),
+    length(L,K),K > 0,
     selectRandom(L,R),
+    pT("\n Player"-Player,cyan),
     takeIndex(R,L,(A,B,C)),
     takeTiles(Player,A,B,C),
-    onStairs(Player,B,C),
-    !.
+    onStairs(Player,B,C),!.
+makeMove(Player):-
+    specialTile(0),
+    retractall(specialTile(_)),
+    T=..[specialTile,Player], assert(T),
+    pT("\n Player"-Player,cyan),
+    pT(" take the especialTile from the Center",cyan).
+makeMove(_).
 
 next(Y):-
     actual(X),
@@ -208,8 +201,13 @@ next(Y):-
     actual(X),
     order([Y,_,_,X]).
 
+completeRow(P,R):-
+    findall(1,board(P,R,_,1),L),
+    length(L,5),!.
 
-
+checkCompleteRows(X,C):-
+    findall(1,(member(R,[0,1,2,3,4]),completeRow(X,R)),L),
+    length(L,C).
 
 
 

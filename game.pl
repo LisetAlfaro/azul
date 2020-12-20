@@ -49,7 +49,7 @@ takefromCover([X|L]):-
 addToCover(Count,Color):-
     Count > 0,
     cover(Color,C),
-    Total = Count + C,
+    Total is Count + C,
     T=..[cover,Color,Total],
     retractall(cover(Color,_)),
     assert(T).
@@ -96,10 +96,20 @@ generateGame():-
 addSpecialTile(X,D1,D):-
     D1 < 7,
     specialTile(X),
-    D is D1 + 1.
-addSpecialTile(_,D,D).
+    D2 is D1 + 1,
+    D is -1 * D2.
+addSpecialTile(_,D1,D):-
+    D is -1 * D1.
 
-finishedGame():-stillTiles(0).
+finishedGame():-
+    findall(1,(member(P,[1,2,3,4]),
+    checkCompleteRows(P,C),C > 0),L),
+    length(L,K),K > 0.
+finishedGame():-
+    findall(1,(bag(_,C1),C1 =\= 0),L1),
+    length(L1,K1),K1 =:= 0,
+    findall(1,(cover(_,C2),C2 =\= 0),L2),
+    length(L2,K2),K2 =:= 0.
 
 
 

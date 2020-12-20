@@ -117,27 +117,31 @@ prepareRound():-
     storageFactories(R,1),!.
 
 floorDamageCalculator(0):-!.
-floorDamageCalculator(X):-
-    findall(Z,(playerFloor(X,_,Z),Z > 0),L),
-    pT("\n Al jugador"-X,red),
-    addList(L,C),
+floorDamageCalculator(P):-
+    findall((Clr,Z),(playerFloor(P,Clr,Z),Z > 0),L),
+    pT("\n Al jugador"-P,red),
+    gSecondList(L,L1),
+    addList(L1,C),
     floordamage(C,D),
-    D1 is -1 * D,
-    addSpecialTile(X,D1,Df),
-    setpoint(X,Df),
-    pT(" se le restan"-Df,red),
-    X1 is X - 1,
-    floorDamageCalculator(X1).
+    addSpecialTile(P,D,Df),
+    setpoint(P,Df),
+    pT(" se le restan":Df,red),
+    P1 is P - 1,
+    %cleanFloor(X,L),
+    floorDamageCalculator(P1).
 
-%startGame():-
-%    finishedGame(),
-%    pT("\n ++++Ended Simulation++++ \n",cyan).
+startGame():-
+    finishedGame(),
+    %finalPoints(),
+    pT("\n ++++Ended Simulation++++ \n",cyan).
 startGame():-
     pT("...Start Round...\n", cyan),
     prepareRound(),
     factoriOffert(),
     tiledToTheWall(),
-    floorDamageCalculator(4).
+    floorDamageCalculator(4),
+    startGame(),!.
+
 deleteAll():-
     retractall(color(_)),
     retractall(fac(_,_,_)),
@@ -158,7 +162,7 @@ azul():-
     pT("----Azul---- (4 players)\n",blue),
     generateGame(),
     generatePlayers(),
-    startGame(),    !.
+    startGame().
 
 
 
