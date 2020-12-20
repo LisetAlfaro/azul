@@ -105,9 +105,7 @@ toTheWall([(A,B,C)|L]):-
 tiledToTheWall():-
     findall((P,Ca,Co),
     stairPlayer(P,Ca,Co,Ca),L),
-    write("\n"),
-    write(L).
-%toTheWall(L)
+    toTheWall(L).
 
 prepareRound():-
     stractFromBag(Lb),
@@ -121,12 +119,14 @@ prepareRound():-
 floorDamageCalculator(0):-!.
 floorDamageCalculator(X):-
     findall(Z,(playerFloor(X,_,Z),Z > 0),L),
+    pT("\n Al jugador"-X,red),
     addList(L,C),
     floordamage(C,D),
     D1 is -1 * D,
     addSpecialTile(X,D1,Df),
     setpoint(X,Df),
-    X1 is X -1,
+    pT(" se le restan"-Df,red),
+    X1 is X - 1,
     floorDamageCalculator(X1).
 
 %startGame():-
@@ -136,8 +136,8 @@ startGame():-
     pT("...Start Round...\n", cyan),
     prepareRound(),
     factoriOffert(),
-    tiledToTheWall().
-%    floorDamageCalculator(4).
+    tiledToTheWall(),
+    floorDamageCalculator(4).
 deleteAll():-
     retractall(color(_)),
     retractall(fac(_,_,_)),
@@ -159,6 +159,9 @@ azul():-
     generateGame(),
     generatePlayers(),
     startGame(),    !.
+
+
+
 
 
 

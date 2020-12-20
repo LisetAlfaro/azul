@@ -10,8 +10,7 @@ wall(3,0,red). wall(3,1,green). wall(3,2,magenta). wall(3,3,blue). wall(3,4,yell
 wall(4,0,yellow). wall(4,1,red). wall(4,2,green). wall(4,3,magenta). wall(4,4,blue).
 
 %This are the values to rest in the floor floor(tileCount,totalDamage)
-floordamage(1,1). floordamage(2,2). floordamage(3,4). floordamage(4,6).
-floordamage(5,8). floordamage(6,11). floordamage(7,14).
+floordamage(0,0).  floordamage(1,1). floordamage(2,2). floordamage(3,4). floordamage(4,6). floordamage(5,8). floordamage(6,11). floordamage(7,14).
 
 %boardGenerator(Player,row,collumn,ocupated)
 boardGenerator(0,_,_):-!.
@@ -78,12 +77,16 @@ updateFloor(Player,Color,Count):-
     plus(D,R,7),%how much I need to get to 7
     min(R,Count,A),%How much I will add
     playerFloor(Player,Color,X),%now many tiles of this color are now
+    write(" Al suelo:"),
+    write(A),
     plus(X,A,C),
     retractall(playerFloor(Player,Color,_)),
     T=..[playerFloor,Player,Color,C],
     assert(T),
-    Rest = Count - A,
-    addToCover(Rest,Color),write("Finished add to floor"),!.
+    Rest is Count - A,
+    write("y ala tapa:"),
+    write(Rest),
+    addToCover(Rest,Color),!.
 
 %gets from the center, ask about especial Tile
 takeTiles(Player,0,Color,Count):-
