@@ -28,7 +28,6 @@ boardGenerator(P,R,C):-
     boardGenerator(P,R,C1).
 
 % stairPlayer(player,capacity,color,ocupated)
-
 stairsGenerator(0,_):-!.
 stairsGenerator(X,0):-
     plus(Y,1,X),
@@ -48,16 +47,13 @@ generatePlayers:-
     assert(points(4,0)),
     assert(actual(0)).
 
-%triuph if the first player is X, initally is
-first(X):- order([X,_,_,_]).
-
-winners(X) :- 
+winners(X) :-
     findall(Y,points(_,Y),L),
     greaters(L,M),
     findall(X,Z,points(Z,M),X).
 
 %see all the posibilities
-posibleMove(L):- 
+posibleMove(L):-
     findall((X,Y,Z),
     (
         fac(X,Y,Z),
@@ -71,18 +67,23 @@ posibleMove(L):-
     append(L1,L2,L).
 
 checkSpecialTile(_):- specialTile(X), X =\= 0.
-
 checkSpecialTile(Player):-
     retractall(specialTile(_)),
-    T=..[specialTile,Player],
-    assert(T).
+    T=..[specialTile,Player],assert(T).
 
 updateFloor(Player,Color,Count):-
-    playerFloor(Player,Color,X),
-    plus(X,Count,C),
+    findall(Z,(playerFloor(Player,_,Z),Z > 0),L),
+    addList(L,S),
+    addSpecialTile(Player,S,D),
+    plus(D,R,7),%how much I need to get to 7
+    min(R,Count,A),%How much I will add
+    playerFloor(Player,Color,X),%now many tiles of this color are now
+    plus(X,A,C),
     retractall(playerFloor(Player,Color,_)),
     T=..[playerFloor,Player,Color,C],
     assert(T),
+    Rest = Count - A,
+    addToCover(Rest,Color),write("Finished add to floor"),!.
 
 %gets from the center, ask about especial Tile
 takeTiles(Player,0,Color,Count):-
@@ -131,7 +132,7 @@ choise(Player,Color,L):-
 % if There is a rest or the row is uncomplete then I will re-record the row and add the rest of the tiles to the floor
 choise(Player,Color,L):-
     greaterThird(L,(A,C)),
-    updateStair(Player,Color,A,C).
+    updateStair(Player,Color,A,C),pT("And go to stair"-A,cyan).
 
 onStairs(Player,Color,Count):-
     stairPlayer(Player,Count,_,0),
@@ -157,25 +158,25 @@ onStairs(Player,Color,Count):-
 onStairs(Player,Color,Count):-
     findall(
         (Ca,X),
-        (
-            stairPlayer(Player,Ca,_,0),
+        (stairPlayer(Player,Ca,_,0),
             plus(Count,X,Ca)),
         L),
     greaterSecond(L,(A,B)),
-    updateStair(Player,Color,A,B).
+    updateStair(Player,Color,A,B),
+     pT(" and going to the stair ":A,cyan).
 onStairs(Player,Color,Count):-
     color(Color,Number),
     findall(
         (Ca,Co,Diference),
-        (
-            stairPlayer(Player,Ca, Number,Co),
+        (stairPlayer(Player,Ca, Number,Co),
             (Ca > Co),
             Diference is Ca-Co-Count,
             (Diference < -2)),
         L),
     choise(Player,Color,L).
 onStairs(Player,Color,Count):-
-    updateFloor(Player,Color,Count).
+    updateFloor(Player,Color,Count),
+     pT(" and put it in the floor ",cyan).
 
 selectRandom([_],0):-!.
 selectRandom(L,R):-
@@ -183,6 +184,7 @@ selectRandom(L,R):-
     random(1,Le,R).
 
 makeMove(Player):-
+    pT("\n Player"-Player,cyan),
     posibleMove(L),
     selectRandom(L,R),
     takeIndex(R,L,(A,B,C)),
@@ -193,18 +195,15 @@ makeMove(Player):-
 next(Y):-
     actual(X),
     order([X,Y,_,_]).
-next(Y):- 
+next(Y):-
     actual(X),
     order([_,X,Y,_]).
-next(Y):- 
+next(Y):-
     actual(X),
     order([_,_,X,Y]).
 next(Y):-
     actual(X),
     order([Y,_,_,X]).
-
-
-
 
 
 

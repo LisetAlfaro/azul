@@ -2,10 +2,11 @@
 :- consult(game).
 :- consult(utils).
 :- consult(printing).
+:- consult(puntuation).
 :- dynamic(center/2).
 
 %TODO:remove from bag and cover the tiles that I take
-stractFromBag(L2):- 
+stractFromBag(L2):-
     findall((X,Y),
     bag(X,Y),P),
     realList(P,L),
@@ -36,13 +37,6 @@ storageFactories([X|L],Y) :-
     plus(Y,1,W),
     storageFactories(L,W).
 
-%storage functions with three arguments
-%storage([],_,_).
-%storage([(X,Y)|L],F,I):-
-    T =..([F,I,X,Y]),
-    assert(T),
-    storage(L,F,I),!.
-
 %extract the tiles from the top of the bag.
 fillFactories() :-
     stractFromBag(Lb),
@@ -56,7 +50,7 @@ fillFactories() :-
     !.
 
 % modify the order fallowed for the spetial tile.
-whoStart():- 
+whoStart():-
     specialTile(X),
     order(L),
     sortOrder(X,L,J),
@@ -80,22 +74,18 @@ takeFromFact(X):-
     retractall(actual(_)),
     T=..[actual,X],
     assert(T),
-    pT("\n\nTurn: player":X,cyan),
     makeMove(X),
     next(N),takeFromFact(N),!.
 
 factoriOffert():-
     whoStart(),
     order([X,Y,W,Z]),
-    pT("\nOrder":X-Y-W-Z,cyan),
-    !,
+    pT("\nOrder":X-Y-W-Z,cyan),!,
     printFactories(),
     printCenter(),
     retractall(specialTile(_)),
-    T=..[specialTile,0],
-    assert(T),
-    takeFromFact(X),
-    !.
+    T=..[specialTile,0],assert(T),
+    takeFromFact(X),!.
 
 tile(P,Ca,Co):-
     color(Color,Co),
@@ -106,37 +96,48 @@ tile(P,Ca,Co):-
 
 toTheWall([]):-!.
 toTheWall([(A,B,C)|L]):-
-    tile(A,B,C),
+    Ca is B-1,
+    tile(A,Ca,C),
     retractall(stairPlayer(A,B,C,_)),
-    T=..[stairPlayer,A,B,0,0],
-    assert(T),
+    T=..[stairPlayer,A,B,0,0],assert(T),
     toTheWall(L).
 
 tiledToTheWall():-
     findall((P,Ca,Co),
     stairPlayer(P,Ca,Co,Ca),L),
-    toTheWall(L).
+    write("\n"),
+    write(L).
+%toTheWall(L)
 
 prepareRound():-
     stractFromBag(Lb),
-    length(Lb,K),
-    !,
+    length(Lb,K), !,
     S is 36 - K,
     stractFromCover(Lc,S),
     append(Lb,Lc,L),
     repart(L,R),
-    storageFactories(R,1),
-    !.
+    storageFactories(R,1),!.
+
+floorDamageCalculator(0):-!.
+floorDamageCalculator(X):-
+    findall(Z,(playerFloor(X,_,Z),Z > 0),L),
+    addList(L,C),
+    floordamage(C,D),
+    D1 is -1 * D,
+    addSpecialTile(X,D1,Df),
+    setpoint(X,Df),
+    X1 is X -1,
+    floorDamageCalculator(X1).
 
 %startGame():-
-    finishedGame(),
-    pT("\n ++++Ended Simulation++++ \n",cyan).
+%    finishedGame(),
+%    pT("\n ++++Ended Simulation++++ \n",cyan).
 startGame():-
     pT("...Start Round...\n", cyan),
     prepareRound(),
     factoriOffert(),
-    tiledToTheWall(),!.
-
+    tiledToTheWall().
+%    floorDamageCalculator(4).
 deleteAll():-
     retractall(color(_)),
     retractall(fac(_,_,_)),
@@ -157,7 +158,7 @@ azul():-
     pT("----Azul---- (4 players)\n",blue),
     generateGame(),
     generatePlayers(),
-    startGame(),!.
+    startGame(),    !.
 
 
 
