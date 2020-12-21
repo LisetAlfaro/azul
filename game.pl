@@ -96,10 +96,8 @@ generateGame():-
 addSpecialTile(X,D1,D):-
     D1 < 7,
     specialTile(X),
-    D2 is D1 + 1,
-    D is -1 * D2.
-addSpecialTile(_,D1,D):-
-    D is -1 * D1.
+    D is D1 + 1.
+addSpecialTile(_,D,D):-!.
 
 finishedGame():-
     findall(1,(member(P,[1,2,3,4]),

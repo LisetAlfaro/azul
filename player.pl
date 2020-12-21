@@ -49,7 +49,7 @@ generatePlayers:-
 winners(X) :-
     findall(Y,points(_,Y),L),
     greaters(L,M),
-    findall(X,Z,points(Z,M),X).
+    findall(Z,points(Z,M),X).
 
 %see all the posibilities
 posibleMove(L):-
@@ -68,8 +68,7 @@ updateFloor(Player,Color,Count):-
     findall(Z,(playerFloor(Player,_,Z),Z > 0),L),
     addList(L,S),
     addSpecialTile(Player,S,D),
-    PD is -1 * D,
-    plus(PD,R,7),%how much I need to get to 7
+    plus(D,R,7),%how much I need to get to 7
     min(R,Count,A),%How much I will add
     playerFloor(Player,Color,X),%now many tiles of this color are now
     write(" Al suelo:"),
@@ -82,6 +81,15 @@ updateFloor(Player,Color,Count):-
     write("y ala tapa:"),
     write(Rest),
     addToCover(Rest,Color),!.
+
+cleanFloor(_,[]):-!.
+cleanFloor(P,[(Clr,C)|L]):-
+    retractall(playerFloor(P,Clr,C)),
+    T =.. [playerFloor,P,Clr,0], assert(T),
+    cover(Clr,C1), Cf is C1 + C,
+    retractall(cover(Clr,C1)),
+    TT =.. [cover,Clr,Cf], assert(TT),
+    cleanFloor(P,L).
 
 %gets from the center, ask about especial Tile
 takeTiles(Player,0,Color,Count):-
@@ -201,12 +209,29 @@ next(Y):-
     actual(X),
     order([Y,_,_,X]).
 
+completeCollumn(P,C):-
+    findall(1,board(P,_,C,1),L),
+    length(L,5),!.
+
+checkCompleteCollumns(X,C):-
+    findall(1,(member(R,[0,1,2,3,4]),completeCollumn(X,R)),L),
+    length(L,C).
+
 completeRow(P,R):-
     findall(1,board(P,R,_,1),L),
     length(L,5),!.
 
 checkCompleteRows(X,C):-
     findall(1,(member(R,[0,1,2,3,4]),completeRow(X,R)),L),
+    length(L,C).
+
+completeColor(P,Clr):-
+    findall((X,Y),wall(X,Y,Clr),L),
+    findall(1,(member((X,Y),L),board(P,X,Y,1)),F),
+    length(F,5).
+
+checkCompleteColors(P,C):-
+    findall(1,(member(Num,[1,2,3,4,5]),color(Clr,Num),completeColor(P,Clr)),L),
     length(L,C).
 
 

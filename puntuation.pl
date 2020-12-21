@@ -57,14 +57,34 @@ updatePoints(Player,R,C):-
     horizontalNext(Player,R,C,C1),
     verticalNext(Player,R,C,C2),
     (C1 > 0 -> Z is C1 + 1;
-    Z = 0),
+    Z is 0),
     (C2 > 0 -> Y is C2 + 1;
-    Y = 0),
-    A is Z+Y,
+    Y is 0),
+    A is Z + Y,
     (A > 0 -> setpoint(Player,A);
     setpoint(Player,1)).
 
-
+finalPoints(0):-!.
+finalPoints(Player):-
+    points(Player,I),
+    findall(1,(checkCompleteRows(Player,C1),
+               C1 > 0),L1),
+    length(L1,K1),
+    findall(1,(checkCompleteCollumns(Player,C2),
+               C2 > 0),L2),
+    length(L2,K2),
+    findall(1,(checkCompleteColors(Player,C3),
+               C3 > 0),L3),
+    length(L3,K3),
+    Rpoints is K1 * 2,
+    Cpoints is K2 * 7,
+    Clrpoints is K3 * 10,
+    Fpoints is I + Rpoints + Cpoints + Clrpoints,
+    retractall(points(Player,_)),
+    T=..[points,Player,Fpoints],
+    assert(T),
+    P1 is Player - 1,
+    finalPoints(P1),!.
 
 
 

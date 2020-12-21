@@ -122,17 +122,18 @@ floorDamageCalculator(P):-
     pT("\n Al jugador"-P,red),
     gSecondList(L,L1),
     addList(L1,C),
-    floordamage(C,D),
-    addSpecialTile(P,D,Df),
-    setpoint(P,Df),
+    addSpecialTile(P,C,D),
+    floordamage(D,Df),
+    plus(Df,X,0), setpoint(P,X),
     pT(" se le restan":Df,red),
     P1 is P - 1,
-    %cleanFloor(X,L),
+    cleanFloor(P,L),
     floorDamageCalculator(P1).
 
 startGame():-
     finishedGame(),
-    %finalPoints(),
+    retractall(specialTile(_)),
+    assert(specialTile(0)),
     pT("\n ++++Ended Simulation++++ \n",cyan).
 startGame():-
     pT("...Start Round...\n", cyan),
@@ -156,13 +157,21 @@ deleteAll():-
     retractall(points(_,_)),
     retractall(stairPlayer(_,_,_,_)),
     retractall(actual(_)).
+conclution():-
+    finalPoints(4),
+    winners(X),
+    pT("\n And the winners are: \n",cyan),
+    printPlayerList(X).
+
 
 %the game is generated, the round start
 azul():-
     pT("----Azul---- (4 players)\n",blue),
     generateGame(),
     generatePlayers(),
-    startGame().
+    startGame(),
+    conclution(),
+    deleteAll(),!.
 
 
 

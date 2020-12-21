@@ -1,16 +1,16 @@
 %S is the string, the posible colors are
 %blue  red  green yellow black cyan  white  magenta
-pT(S, Color):- 
+pT(S, Color):-
     ansi_format([bold, fg(Color)], S, []).
 
 printList([]):-
     pT(" ",cyan),!.
-printList([X|Xs]):- 
+printList([X|Xs]):-
     pT("1",X),
     printList(Xs).
 
 printFactories_aux(10):-!.
-printFactories_aux(X):- 
+printFactories_aux(X):-
     findall((C,Y),
     fac(X,C,Y),L),
     pT(" Factory-",cyan),
@@ -28,6 +28,11 @@ printCenter():-
     realList(L,L2),
     printList(L2).
 
-printFactories():- 
+printFactories():-
     pT("\n\n",black),
     printFactories_aux(1).
+
+printPlayerList([]):-!.
+printPlayerList([X|L]):-
+    pT(" Player":X,cyan),
+    printPlayerList(L).
